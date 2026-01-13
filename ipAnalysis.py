@@ -1,17 +1,21 @@
-import logging
-from scapy.all import sniff, IP, TCP, UDP
+from scapy.all import TCP, sniff, TCPSession, IP
+from scapy.layers.http import HTTPRequest, HTTPResponse
 
-def packet_callback(packet):
-    print("This")
-    if packet.haslayer(IP):
-        print("THis2")
-        src_ip = packet[IP].src
-        dst_ip = packet[IP].dst
-        proto = packet[IP].proto
+def packet_handling(packet):
+    print("Some packet handling")
 
-        log = f"Source: {src_ip} | Destination: {dst_ip} | Protocol: {proto}"
+    log = ""
 
-        print(log)
+    if packet.haslayer(IP) and packet.haslayer(TCP):
+        log += f"Source: {packet[IP].src} | Destination: {packet[IP].dst}"
 
-print("Starting network logger\n")
-sniff(prn=packet_callback, store=0)
+    if packet.haslayer(HTTPResponse):
+        log += f" | Status: {packet[HTTPResponse].Status_Code.decode()}"
+
+    if packet.haslayer(HTTPRequest):
+        log += f" | Path: {packet[HTTPRequest].Path.decode()}"
+
+    print(log)
+
+print("Logger starting")
+sniff(prn = packet_handling, store = 0, filter = "tcp")
