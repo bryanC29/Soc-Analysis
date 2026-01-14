@@ -17,5 +17,8 @@ def packet_handling(packet):
 
     print(log)
 
+    with open("./network_log.txt", "a") as f:
+        f.write(log + "\n")
+
 print("Logger starting")
-sniff(prn = packet_handling, store = 0, filter = "tcp")
+sniff(prn = packet_handling, store = 0, filter = "tcp", session = TCPSession)
